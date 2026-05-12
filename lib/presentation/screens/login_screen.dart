@@ -21,9 +21,7 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 70),
               const WelcomeTitleWidget(),
               const SizedBox(height: 40),
-              const Center(
-                child: IllustrationWidget(),
-              ),
+              const Center(child: IllustrationWidget()),
               const Spacer(),
               const GoogleButtonWidget(),
               const SizedBox(height: 18),
@@ -195,17 +193,9 @@ class IllustrationWidget extends StatelessWidget {
                   top: 15,
                   child: Column(
                     children: [
-                      Container(
-                        width: 62,
-                        height: 5,
-                        color: Colors.white,
-                      ),
+                      Container(width: 62, height: 5, color: Colors.white),
                       const SizedBox(height: 4),
-                      Container(
-                        width: 45,
-                        height: 4,
-                        color: Colors.white,
-                      ),
+                      Container(width: 45, height: 4, color: Colors.white),
                     ],
                   ),
                 ),
@@ -272,11 +262,7 @@ class CheckCircleWidget extends StatelessWidget {
         color: Color(0xFF09A9D8),
         shape: BoxShape.circle,
       ),
-      child: const Icon(
-        Icons.check,
-        color: Colors.white,
-        size: 18,
-      ),
+      child: const Icon(Icons.check, color: Colors.white, size: 18),
     );
   }
 }
@@ -330,9 +316,7 @@ class GoogleButtonWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: const Color(0xFFDADADA),
-              ),
+              border: Border.all(color: const Color(0xFFDADADA)),
             ),
             child: auth.isLoading
                 ? const Center(
