@@ -6,14 +6,27 @@ import '../controllers/auth_controller.dart';
 import '../widgets/custom_widgets.dart';
 import 'users_list_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
-  void navigateToUsersList(BuildContext context) {
+  @override
+  State<LoginScreen> createState() => LoginScreenState();
+}
+
+class LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthController>().loadAvailableAccounts();
+    });
+  }
+
+  void navigateToUsersList() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const UsersListScreen()));
   }
 
-  void showAccountPicker(BuildContext context, List<GoogleSignInAccount> accounts, AuthController auth) {
+  void showAccountPicker(List<GoogleSignInAccount> accounts, AuthController auth) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -34,7 +47,7 @@ class LoginScreen extends StatelessWidget {
                   onTap: () async {
                     Navigator.pop(ctx);
                     await auth.selectAccount(account);
-                    if (auth.isLoggedIn) navigateToUsersList(context);
+                    if (auth.isLoggedIn) navigateToUsersList();
                   },
                 )),
             const Divider(height: 32),
@@ -46,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                 Navigator.pop(ctx);
                 await auth.addAnotherAccount();
                 await auth.signInWithGoogle();
-                if (auth.isLoggedIn) navigateToUsersList(context);
+                if (auth.isLoggedIn) navigateToUsersList();
               },
             ),
             const SizedBox(height: 16),
@@ -56,6 +69,15 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  void handleGoogleSignIn(AuthController auth) async {
+    if (auth.availableAccounts.isNotEmpty) {
+      showAccountPicker(auth.availableAccounts, auth);
+    } else {
+      final success = await auth.signInWithGoogle();
+      if (success) navigateToUsersList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,10 +85,6 @@ class LoginScreen extends StatelessWidget {
       body: SafeArea(
         child: Consumer<AuthController>(
           builder: (context, auth, child) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (auth.availableAccounts.isEmpty) auth.loadAvailableAccounts();
-            });
-
             return Padding(
               padding: const EdgeInsets.all(24),
               child: Column(children: [
@@ -75,35 +93,24 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 40),
                 const WelcomeTitle(),
                 const Spacer(),
-                if (auth.availableAccounts.isNotEmpty)
-                  AccountList(
-                    accounts: auth.availableAccounts,
-                    onSelect: (account) async {
-                      await auth.selectAccount(account);
-                      if (auth.isLoggedIn) navigateToUsersList(context);
-                    },
-                    onAddAnother: () async {
-                      await auth.addAnotherAccount();
-                      if (auth.availableAccounts.isNotEmpty) {
-                        showAccountPicker(context, auth.availableAccounts, auth);
-                      } else {
-                        final success = await auth.signInWithGoogle();
-                        if (success) navigateToUsersList(context);
-                      }
-                    },
-                  )
-                else
-                  GoogleButton(
-                    isLoading: auth.isLoading,
-                    onPressed: () async {
-                      if (auth.availableAccounts.isNotEmpty) {
-                        showAccountPicker(context, auth.availableAccounts, auth);
-                      } else {
-                        final success = await auth.signInWithGoogle();
-                        if (success) navigateToUsersList(context);
-                      }
-                    },
-                  ),
+                auth.availableAccounts.isNotEmpty
+                    ? AccountList(
+                        accounts: auth.availableAccounts,
+                        onSelect: (account) async {
+                          await auth.selectAccount(account);
+                          if (auth.isLoggedIn) navigateToUsersList();
+                        },
+                        onAddAnother: () async {
+                          await auth.addAnotherAccount();
+                          if (auth.availableAccounts.isNotEmpty) {
+                            showAccountPicker(auth.availableAccounts, auth);
+                          } else {
+                            final success = await auth.signInWithGoogle();
+                            if (success) navigateToUsersList();
+                          }
+                        },
+                      )
+                    : GoogleButton(isLoading: auth.isLoading, onPressed: () => handleGoogleSignIn(auth)),
                 const SizedBox(height: 24),
                 const TermsText(),
                 const SizedBox(height: 32),
