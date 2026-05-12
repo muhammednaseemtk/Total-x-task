@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "930206053784",
+    "project_id": "total-x-task-65773",
+    "storage_bucket": "total-x-task-65773.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930206053784:android:be6fc26ed6629b3f3667ed",
+        "android_client_info": {
+          "package_name": "com.totalxsoftware.totalx_task"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "930206053784-u9635rq8d84i71g7v384ambt7m61bfpm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.totalxsoftware.totalx_task",
+            "certificate_hash": "6f8bc339281552f56aa7821cabaa42e05e473a06"
+          }
+        },
+        {
+          "client_id": "930206053784-o557kn578j8baap38n0rgbp7bko4sts9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf6-cECVHTR_-Y8kHCmeBQdhcBZLaVm0I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "930206053784-o557kn578j8baap38n0rgbp7bko4sts9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
