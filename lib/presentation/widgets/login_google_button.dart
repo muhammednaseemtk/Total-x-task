@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_button/sign_in_button.dart';
+
 import '../controllers/auth_controller.dart';
 import '../screens/users_list_screen.dart';
 

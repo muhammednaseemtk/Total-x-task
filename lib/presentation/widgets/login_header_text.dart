@@ -7,7 +7,11 @@ class LoginHeaderText extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Text(
       'Login or create an Account',
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF333333)),
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF333333),
+      ),
     );
   }
 }
