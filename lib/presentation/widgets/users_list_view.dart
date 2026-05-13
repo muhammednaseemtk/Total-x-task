@@ -43,19 +43,22 @@ class _UsersListViewState extends State<UsersListView> {
     return Consumer<UserController>(
       builder: (context, userCtrl, child) {
         if (userCtrl.isLoading && userCtrl.users.isEmpty) return const Center(child: CircularProgressIndicator());
-        if (userCtrl.errorMessage != null && userCtrl.users.isEmpty) return _ErrorState(message: userCtrl.errorMessage!, onRetry: () => userCtrl.loadUsers(refresh: true));
-        if (userCtrl.users.isEmpty) return const _EmptyState();
+        final displayUsers = userCtrl.filteredUsers;
+        if (userCtrl.errorMessage != null && displayUsers.isEmpty) return _ErrorState(message: userCtrl.errorMessage!, onRetry: () => userCtrl.loadUsers(refresh: true));
+        if (displayUsers.isEmpty && userCtrl.searchQuery.isNotEmpty) return const _NoSearchResultsState();
+        if (displayUsers.isEmpty) return const _EmptyState();
 
         return RefreshIndicator(
           onRefresh: () => userCtrl.loadUsers(refresh: true),
           child: ListView.builder(
             controller: _scrollCtrl,
             padding: const EdgeInsets.all(16),
-            itemCount: userCtrl.users.length + (userCtrl.hasMoreData ? 1 : 0),
+            itemCount: displayUsers.length + (userCtrl.hasMoreData ? 1 : 0),
             itemBuilder: (context, index) {
-              if (index == userCtrl.users.length) return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
-              final user = userCtrl.users[index];
+              if (index == displayUsers.length) return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+              final user = displayUsers[index];
               return UserListItem(
+                key: ValueKey(user.id),
                 user: user,
                 onDelete: () => _confirmDelete(context, user.id, user.name),
               );
@@ -88,6 +91,26 @@ class _EmptyState extends StatelessWidget {
           Text('No users found', style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
           SizedBox(height: 8),
           Text('Add your first user by tapping the button below', style: TextStyle(color: AppColors.grey)),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoSearchResultsState extends StatelessWidget {
+  const _NoSearchResultsState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 64, color: AppColors.grey),
+          SizedBox(height: 16),
+          Text('No results found', style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+          SizedBox(height: 8),
+          Text('Try a different search term', style: TextStyle(color: AppColors.grey)),
         ],
       ),
     );
@@ -193,7 +216,7 @@ class _AgeTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(color: isOlder ? Colors.orange.withAlpha(26) : Colors.green.withAlpha(26), borderRadius: BorderRadius.circular(4)),
-      child: Text('$age yrs (${isOlder ? 'Older' : 'Younger'})', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isOlder ? Colors.orange[700] : Colors.green[700])),
+      child: Text('Age: $age', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isOlder ? Colors.orange[700] : Colors.green[700])),
     );
   }
 }

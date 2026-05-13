@@ -6,14 +6,27 @@ class UsersHeader extends StatelessWidget {
   final VoidCallback onFilter;
   final TextEditingController searchController;
   final VoidCallback onClearSearch;
+  final Function(String) onSearchChanged;
 
-  const UsersHeader({super.key, required this.onLogout, required this.onFilter, required this.searchController, required this.onClearSearch});
+  const UsersHeader({
+    super.key,
+    required this.onLogout,
+    required this.onFilter,
+    required this.searchController,
+    required this.onClearSearch,
+    required this.onSearchChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
       LocationHeader(location: 'Nilambur', onLogout: onLogout),
-      SearchFilterBar(onFilter: onFilter, searchController: searchController, onClearSearch: onClearSearch),
+      SearchFilterBar(
+        onFilter: onFilter,
+        searchController: searchController,
+        onClearSearch: onClearSearch,
+        onSearchChanged: onSearchChanged,
+      ),
     ]);
   }
 }
@@ -46,8 +59,15 @@ class SearchFilterBar extends StatefulWidget {
   final VoidCallback onFilter;
   final TextEditingController searchController;
   final VoidCallback onClearSearch;
+  final Function(String) onSearchChanged;
 
-  const SearchFilterBar({super.key, required this.onFilter, required this.searchController, required this.onClearSearch});
+  const SearchFilterBar({
+    super.key,
+    required this.onFilter,
+    required this.searchController,
+    required this.onClearSearch,
+    required this.onSearchChanged,
+  });
 
   @override
   State<SearchFilterBar> createState() => _SearchFilterBarState();
@@ -79,26 +99,105 @@ class _SearchFilterBarState extends State<SearchFilterBar> {
         children: [
           Expanded(
             child: Container(
-              decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.divider)),
-              child: TextField(
-                controller: widget.searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search by name or phone',
-                  hintStyle: const TextStyle(color: AppColors.grey),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.grey),
-                  suffixIcon: widget.searchController.text.isNotEmpty
-                      ? IconButton(icon: const Icon(Icons.clear, color: AppColors.grey), onPressed: widget.onClearSearch)
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F3F3),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: const Color(0xFFB8B8B8),
+                  width: 1.2,
                 ),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 18),
+                  const Icon(
+                    Icons.search,
+                    size: 28,
+                    color: Color(0xFF505050),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: widget.searchController,
+                      onChanged: widget.onSearchChanged,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF404040),
+                        fontWeight: FontWeight.w400,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'search by name',
+                        hintStyle: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF9E9E9E),
+                          fontWeight: FontWeight.w400,
+                        ),
+                        border: InputBorder.none,
+                        isCollapsed: true,
+                        suffixIcon: widget.searchController.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: widget.onClearSearch,
+                                child: const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 20,
+                                    color: Color(0xFF505050),
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Container(
-            decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.divider)),
-            child: IconButton(icon: const Icon(Icons.filter_list), onPressed: widget.onFilter),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: widget.onFilter,
+            child: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 18,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 14,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 10,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

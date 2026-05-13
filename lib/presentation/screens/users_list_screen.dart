@@ -28,6 +28,7 @@ class UsersListScreen extends StatelessWidget {
                   onFilter: () => showSortSheet(context, userCtrl),
                   searchController: userCtrl.searchController,
                   onClearSearch: userCtrl.clearSearch,
+                  onSearchChanged: userCtrl.search,
                 ),
                 Expanded(
                   child: UsersListView(
