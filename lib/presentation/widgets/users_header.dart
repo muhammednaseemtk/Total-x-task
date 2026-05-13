@@ -111,47 +111,54 @@ class _SearchFilterBarState extends State<SearchFilterBar> {
               child: Row(
                 children: [
                   const SizedBox(width: 18),
-                  const Icon(
-                    Icons.search,
-                    size: 28,
-                    color: Color(0xFF505050),
+                  const Center(
+                    child: Icon(
+                      Icons.search,
+                      size: 24,
+                      color: Color(0xFF505050),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextFormField(
-                      controller: widget.searchController,
-                      onChanged: widget.onSearchChanged,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF404040),
-                        fontWeight: FontWeight.w400,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'search by name',
-                        hintStyle: const TextStyle(
+                    child: Center(
+                      child: TextFormField(
+                        controller: widget.searchController,
+                        onChanged: widget.onSearchChanged,
+                        style: const TextStyle(
                           fontSize: 16,
-                          color: Color(0xFF9E9E9E),
+                          color: Color(0xFF404040),
                           fontWeight: FontWeight.w400,
                         ),
-                        border: InputBorder.none,
-                        isCollapsed: true,
-                        suffixIcon: widget.searchController.text.isNotEmpty
-                            ? GestureDetector(
-                                onTap: widget.onClearSearch,
-                                child: const Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 20,
-                                    color: Color(0xFF505050),
-                                  ),
-                                ),
-                              )
-                            : null,
+                        decoration: InputDecoration(
+                          hintText: 'search by name',
+                          hintStyle: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF9E9E9E),
+                            fontWeight: FontWeight.w400,
+                          ),
+                          border: InputBorder.none,
+                          isCollapsed: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 18),
+                  if (widget.searchController.text.isNotEmpty)
+                    GestureDetector(
+                      onTap: widget.onClearSearch,
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 18),
+                          child: Icon(
+                            Icons.close,
+                            size: 20,
+                            color: Color(0xFF505050),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(width: 18),
                 ],
               ),
             ),

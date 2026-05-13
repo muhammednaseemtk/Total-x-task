@@ -4,12 +4,12 @@ import '../../core/constants/color_constants.dart';
 import '../../core/utils/helpers.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/user_controller.dart';
-import '../widgets/add_user_dialog.dart';
 import '../widgets/users_header.dart';
 import '../widgets/users_sort_sheet.dart';
 import '../widgets/users_sign_out_dialog.dart';
 import '../widgets/users_list_view.dart';
 import 'login_screen.dart';
+import 'add_user_screen.dart';
 
 class UsersListScreen extends StatelessWidget {
   const UsersListScreen({super.key});
@@ -53,21 +53,12 @@ class UsersListScreen extends StatelessWidget {
   void showAddUserDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AddUserDialog(
-        onSubmit: (name, phone, age, imagePath) async {
+      builder: (ctx) => AddUserScreen(
+        onSave: () {
+          Navigator.pop(ctx);
           final userCtrl = context.read<UserController>();
-          final success = await userCtrl.addUser(
-            name: name,
-            phone: phone,
-            age: age,
-            imagePath: imagePath,
-          );
-          if (context.mounted)
-            Helpers.showSnackBar(
-              context,
-              success ? 'User added successfully' : 'Failed to add user',
-              isError: !success,
-            );
+          userCtrl.addUser(name: 'Sam Curren', phone: '+91 9876543210', age: 43, imagePath: null);
+          Helpers.showSnackBar(context, 'User added successfully');
         },
       ),
     );
@@ -87,12 +78,13 @@ class UsersListScreen extends StatelessWidget {
   void deleteUser(BuildContext context, String id, String name) async {
     final userCtrl = context.read<UserController>();
     final success = await userCtrl.deleteUser(id);
-    if (context.mounted)
+    if (context.mounted) {
       Helpers.showSnackBar(
         context,
         success ? 'User deleted' : 'Failed to delete user',
         isError: !success,
       );
+    }
   }
 
   void signOutWithAuth(BuildContext context) async {
@@ -103,11 +95,12 @@ class UsersListScreen extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       final authCtrl = context.read<AuthController>();
       await authCtrl.signOut();
-      if (context.mounted)
+      if (context.mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
+      }
     }
   }
 }
