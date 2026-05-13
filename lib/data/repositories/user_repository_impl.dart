@@ -9,10 +9,9 @@ class UserRepositoryImpl implements UserRepository {
   final ImageService imageService;
 
   UserRepositoryImpl({
-    required UserService userService,
-    required ImageService imageService,
-  })  : userService = userService,
-        imageService = imageService;
+    required this.userService,
+    required this.imageService,
+  });
 
   @override
   Future<List<User>> getUsers({int page = 0, int pageSize = 20}) async {

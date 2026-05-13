@@ -15,7 +15,7 @@ void main() async {
   await Firebase.initializeApp();
 
   final authService = FirebaseAuthService();
-  final userService = UserService();  
+  final userService = UserService();
   final imageService = ImageService();
 
   final userRepository = UserRepositoryImpl(
@@ -36,7 +36,7 @@ void main() async {
       child: const TotalXApp(),
     ),
   );
-}
+} 
 
 class TotalXApp extends StatelessWidget {
   const TotalXApp({super.key});

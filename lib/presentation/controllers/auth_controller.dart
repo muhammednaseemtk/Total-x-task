@@ -11,8 +11,7 @@ class AuthController extends ChangeNotifier {
   String? errorMessage;
   List<GoogleSignInAccount> availableAccounts = [];
 
-  AuthController({required FirebaseAuthService authService})
-      : authService = authService {
+  AuthController({required this.authService}) {
     initAuthState();
   }
 

@@ -17,8 +17,15 @@ class UserController extends ChangeNotifier {
   SortType sortType = SortType.all;
   String? errorMessage;
   int currentPage = 0;
+  TextEditingController searchController = TextEditingController();
 
-  UserController({required UserRepository repository}) : repository = repository;
+  UserController({required this.repository}) {
+    searchController.addListener(onSearchChanged);
+  }
+
+  void onSearchChanged() {
+    search(searchController.text);
+  }
 
   List<User> get usersValue => filteredUsers;
   bool get isLoadingValue => isLoading;
@@ -162,6 +169,12 @@ class UserController extends ChangeNotifier {
     applyFilters();
   }
 
+  void clearSearch() {
+    searchController.clear();
+    searchQuery = '';
+    applyFilters();
+  }
+
   void setSortType(SortType type) {
     sortType = type;
     applyFilters();
@@ -195,6 +208,14 @@ class UserController extends ChangeNotifier {
     sortType = SortType.all;
     currentPage = 0;
     hasMoreData = true;
+    searchController.clear();
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    searchController.removeListener(onSearchChanged);
+    searchController.dispose();
+    super.dispose();
   }
 }
