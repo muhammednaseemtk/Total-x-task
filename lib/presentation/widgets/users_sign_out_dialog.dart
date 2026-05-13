@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 class UsersSignOutDialog extends StatelessWidget {
-  final VoidCallback onConfirm;
-
-  const UsersSignOutDialog({super.key, required this.onConfirm});
+  const UsersSignOutDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

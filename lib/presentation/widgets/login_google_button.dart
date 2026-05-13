@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_button/sign_in_button.dart';
-
 import '../controllers/auth_controller.dart';
 import '../screens/users_list_screen.dart';
 
@@ -17,12 +16,12 @@ class LoginGoogleButton extends StatelessWidget {
           height: 50,
           child: SignInButton(
             Buttons.google,
-            text: "Sign in with Google",
+            text: "Continue with Google",
 
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               side: const BorderSide(
-                color: Colors.black,
+                color: Colors.black26, 
                 width: 1.5,
               ),
             ),

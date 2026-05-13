@@ -36,7 +36,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              const LoginGoogleButton(),
+              Center(child: const LoginGoogleButton()),
               const SizedBox(height: 18),
               const LoginTermsText(),
               const SizedBox(height: 35),

@@ -71,7 +71,7 @@ class UserController extends ChangeNotifier {
   }
 
   Future<void> loadMoreUsers() async {
-    if (isLoadingMore || !hasMoreData) return;
+    if (isLoadingMore || isLoading || !hasMoreData) return;
 
     isLoadingMore = true;
     notifyListeners();

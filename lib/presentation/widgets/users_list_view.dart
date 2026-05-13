@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/color_constants.dart';
 import '../../core/utils/helpers.dart';
+import '../../domain/entities/user.dart';
 import '../controllers/user_controller.dart';
 import 'users_delete_dialog.dart';
 
@@ -117,7 +118,7 @@ class _ErrorState extends StatelessWidget {
 }
 
 class UserListItem extends StatelessWidget {
-  final dynamic user;
+  final User user;
   final VoidCallback? onDelete;
 
   const UserListItem({super.key, required this.user, this.onDelete});
@@ -139,7 +140,7 @@ class UserListItem extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                _UserAvatar(),
+                _UserAvatar(name: user.name),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -164,15 +165,19 @@ class UserListItem extends StatelessWidget {
 }
 
 class _UserAvatar extends StatelessWidget {
+  final String name;
+
+  const _UserAvatar({required this.name});
+
   @override
   Widget build(BuildContext context) {
-    final color = Helpers.getAvatarColor(context.read<UserController>().users.isNotEmpty ? 'User' : 'User');
+    final color = Helpers.getAvatarColor(name.isNotEmpty ? name : 'User');
     return Container(
       width: 56,
       height: 56,
       decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       child: Center(
-        child: Text(Helpers.getInitials('User'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.white)),
+        child: Text(Helpers.getInitials(name), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.white)),
       ),
     );
   }
