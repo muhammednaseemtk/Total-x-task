@@ -4,14 +4,16 @@ import '../../core/constants/color_constants.dart';
 class UsersHeader extends StatelessWidget {
   final VoidCallback onLogout;
   final VoidCallback onFilter;
+  final TextEditingController searchController;
+  final VoidCallback onClearSearch;
 
-  const UsersHeader({super.key, required this.onLogout, required this.onFilter});
+  const UsersHeader({super.key, required this.onLogout, required this.onFilter, required this.searchController, required this.onClearSearch});
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
       LocationHeader(location: 'Nilambur', onLogout: onLogout),
-      SearchFilterBar(onFilter: onFilter),
+      SearchFilterBar(onFilter: onFilter, searchController: searchController, onClearSearch: onClearSearch),
     ]);
   }
 }
@@ -40,10 +42,33 @@ class LocationHeader extends StatelessWidget {
   }
 }
 
-class SearchFilterBar extends StatelessWidget {
+class SearchFilterBar extends StatefulWidget {
   final VoidCallback onFilter;
+  final TextEditingController searchController;
+  final VoidCallback onClearSearch;
 
-  const SearchFilterBar({super.key, required this.onFilter});
+  const SearchFilterBar({super.key, required this.onFilter, required this.searchController, required this.onClearSearch});
+
+  @override
+  State<SearchFilterBar> createState() => _SearchFilterBarState();
+}
+
+class _SearchFilterBarState extends State<SearchFilterBar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.searchController.removeListener(_onSearchChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,13 +80,17 @@ class SearchFilterBar extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.divider)),
-              child: const TextField(
+              child: TextField(
+                controller: widget.searchController,
                 decoration: InputDecoration(
                   hintText: 'Search by name or phone',
-                  hintStyle: TextStyle(color: AppColors.grey),
-                  prefixIcon: Icon(Icons.search, color: AppColors.grey),
+                  hintStyle: const TextStyle(color: AppColors.grey),
+                  prefixIcon: const Icon(Icons.search, color: AppColors.grey),
+                  suffixIcon: widget.searchController.text.isNotEmpty
+                      ? IconButton(icon: const Icon(Icons.clear, color: AppColors.grey), onPressed: widget.onClearSearch)
+                      : null,
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
             ),
@@ -69,7 +98,7 @@ class SearchFilterBar extends StatelessWidget {
           const SizedBox(width: 12),
           Container(
             decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.divider)),
-            child: IconButton(icon: const Icon(Icons.filter_list), onPressed: onFilter),
+            child: IconButton(icon: const Icon(Icons.filter_list), onPressed: widget.onFilter),
           ),
         ],
       ),

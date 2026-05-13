@@ -3,7 +3,7 @@ import '../../core/constants/app_constants.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/user_repository.dart';
 
-enum SortType { all, above60, below60 }
+enum SortType { all, above25, below25 }
 
 class UserController extends ChangeNotifier {
   final UserRepository repository;
@@ -187,8 +187,8 @@ class UserController extends ChangeNotifier {
           user.phone.contains(searchQuery);
 
       final matchesSort = sortType == SortType.all ||
-          (sortType == SortType.above60 && user.isOlder) ||
-          (sortType == SortType.below60 && user.isYounger);
+          (sortType == SortType.above25 && user.ageAbove25) ||
+          (sortType == SortType.below25 && user.ageBelow25);
 
       return matchesSearch && matchesSort;
     }).toList();

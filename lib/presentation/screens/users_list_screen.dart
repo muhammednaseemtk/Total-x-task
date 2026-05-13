@@ -26,6 +26,8 @@ class UsersListScreen extends StatelessWidget {
                 UsersHeader(
                   onLogout: () => signOutWithAuth(context),
                   onFilter: () => showSortSheet(context, userCtrl),
+                  searchController: userCtrl.searchController,
+                  onClearSearch: userCtrl.clearSearch,
                 ),
                 Expanded(
                   child: UsersListView(

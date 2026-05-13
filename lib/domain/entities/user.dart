@@ -35,4 +35,6 @@ class User {
 
   bool get isOlder => age >= 60;
   bool get isYounger => age < 60;
+  bool get ageAbove25 => age > 25;
+  bool get ageBelow25 => age <= 25;
 }
