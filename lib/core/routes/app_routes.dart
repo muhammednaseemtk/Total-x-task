@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'route_names.dart';
-import '../../views/auth/login_screen.dart';
-import '../../views/home/home_screen.dart';
+import '../../views/auth/view/login_screen.dart';
+import '../../views/home/view/home_screen.dart';
 
 class AppRoutes {
   AppRoutes._();

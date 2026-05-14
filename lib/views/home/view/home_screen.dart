@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/utils/helpers.dart';
-import '../auth/controllers/auth_controller.dart';
-import 'controllers/user_controller.dart';
-import 'widgets/search_bar.dart';
-import 'widgets/users_list_view.dart';
-import 'widgets/sort_sheet.dart';
-import 'widgets/sign_out_dialog.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/helpers.dart';
+import '../../auth/controllers/auth_controller.dart';
+import '../controllers/user_controller.dart';
+import '../widgets/search_bar.dart';
+import '../widgets/users_list_view.dart';
+import '../widgets/sort_sheet.dart';
+import '../widgets/sign_out_dialog.dart';
 import 'add_user_screen.dart';
-import '../../core/routes/route_names.dart';
+import '../../../core/routes/route_names.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,7 +31,10 @@ class HomeScreen extends StatelessWidget {
                 ),
                 if (!userCtrl.isLoading && userCtrl.filteredUsers.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     alignment: Alignment.centerLeft,
                     child: const Text(
                       'User List',
@@ -70,12 +73,21 @@ class HomeScreen extends StatelessWidget {
       builder: (ctx) => AddUserScreen(
         onSave: (name, phone, age, imagePath) {
           if (name.isEmpty || phone.isEmpty || age <= 0) {
-            Helpers.showSnackBar(context, 'Please fill all fields correctly', isError: true);
+            Helpers.showSnackBar(
+              context,
+              'Please fill all fields correctly',
+              isError: true,
+            );
             return;
           }
           Navigator.pop(ctx);
           final userCtrl = context.read<UserController>();
-          userCtrl.addUser(name: name, phone: phone, age: age, imagePath: imagePath);
+          userCtrl.addUser(
+            name: name,
+            phone: phone,
+            age: age,
+            imagePath: imagePath,
+          );
           Helpers.showSnackBar(context, 'User added successfully');
         },
         onCancel: (name, phone, age, imagePath) {

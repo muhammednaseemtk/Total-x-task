@@ -5,7 +5,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthRepository {
   final AuthService _authService;
 
-  AuthRepository({AuthService? authService}) : _authService = authService ?? AuthService();
+  AuthRepository({AuthService? authService})
+    : _authService = authService ?? AuthService();
 
   Stream<User?> get authStateChanges => _authService.authStateChanges;
 

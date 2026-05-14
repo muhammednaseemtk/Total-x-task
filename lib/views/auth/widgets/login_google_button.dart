@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_button/sign_in_button.dart';
-import '../../auth/controllers/auth_controller.dart';
+import '../controllers/auth_controller.dart';
 import '../../../core/routes/route_names.dart';
 
 class LoginGoogleButton extends StatelessWidget {
