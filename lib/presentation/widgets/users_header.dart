@@ -5,7 +5,6 @@ class UsersHeader extends StatelessWidget {
   final VoidCallback onLogout;
   final VoidCallback onFilter;
   final TextEditingController searchController;
-  final VoidCallback onClearSearch;
   final Function(String) onSearchChanged;
 
   const UsersHeader({
@@ -13,21 +12,25 @@ class UsersHeader extends StatelessWidget {
     required this.onLogout,
     required this.onFilter,
     required this.searchController,
-    required this.onClearSearch,
     required this.onSearchChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      LocationHeader(location: 'Nilambur', onLogout: onLogout),
-      SearchFilterBar(
-        onFilter: onFilter,
-        searchController: searchController,
-        onClearSearch: onClearSearch,
-        onSearchChanged: onSearchChanged,
-      ),
-    ]);
+    return Column(
+      children: [
+        LocationHeader(location: 'Nilambur', onLogout: onLogout),
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: AppColors.background,
+          child: CustomSearchFilterBar(
+            onFilter: onFilter,
+            searchController: searchController,
+            onSearchChanged: onSearchChanged,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -35,7 +38,11 @@ class LocationHeader extends StatelessWidget {
   final String location;
   final VoidCallback onLogout;
 
-  const LocationHeader({super.key, required this.location, required this.onLogout});
+  const LocationHeader({
+    super.key,
+    required this.location,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,168 +53,140 @@ class LocationHeader extends StatelessWidget {
         children: [
           const Icon(Icons.location_on, color: AppColors.white, size: 20),
           const SizedBox(width: 8),
-          Text(location, style: const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w500)),
+          Text(
+            location,
+            style: const TextStyle(
+              color: AppColors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const Spacer(),
-          IconButton(icon: const Icon(Icons.logout, color: AppColors.white), onPressed: onLogout),
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.white),
+            onPressed: onLogout,
+          ),
         ],
       ),
     );
   }
 }
 
-class SearchFilterBar extends StatefulWidget {
+class CustomSearchFilterBar extends StatelessWidget {
   final VoidCallback onFilter;
   final TextEditingController searchController;
-  final VoidCallback onClearSearch;
   final Function(String) onSearchChanged;
 
-  const SearchFilterBar({
+  const CustomSearchFilterBar({
     super.key,
     required this.onFilter,
     required this.searchController,
-    required this.onClearSearch,
     required this.onSearchChanged,
   });
 
   @override
-  State<SearchFilterBar> createState() => _SearchFilterBarState();
-}
-
-class _SearchFilterBarState extends State<SearchFilterBar> {
-  @override
-  void initState() {
-    super.initState();
-    widget.searchController.addListener(_onSearchChanged);
-  }
-
-  void _onSearchChanged() {
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    widget.searchController.removeListener(_onSearchChanged);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: AppColors.background,
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F3F3),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: const Color(0xFFB8B8B8),
-                  width: 1.2,
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 52,
+            child: TextField(
+              controller: searchController,
+              onChanged: onSearchChanged,
+              cursorColor: Colors.black,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF444444),
+              ),
+              decoration: InputDecoration(
+                hintText: 'search by name',
+                hintStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF9E9E9E),
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 30,
+                  color: Color(0xFF555555),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFF5F5F5),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 16,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFB8B8B8),
+                    width: 1.2,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFB8B8B8),
+                    width: 1.2,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFB8B8B8),
+                    width: 1.2,
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 18),
-                  const Center(
-                    child: Icon(
-                      Icons.search,
-                      size: 24,
-                      color: Color(0xFF505050),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Center(
-                      child: TextFormField(
-                        controller: widget.searchController,
-                        onChanged: widget.onSearchChanged,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF404040),
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'search by name',
-                          hintStyle: const TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF9E9E9E),
-                            fontWeight: FontWeight.w400,
-                          ),
-                          border: InputBorder.none,
-                          isCollapsed: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (widget.searchController.text.isNotEmpty)
-                    GestureDetector(
-                      onTap: widget.onClearSearch,
-                      child: const Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 18),
-                          child: Icon(
-                            Icons.close,
-                            size: 20,
-                            color: Color(0xFF505050),
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 18),
-                ],
-              ),
             ),
           ),
-          const SizedBox(width: 10),
-          GestureDetector(
-            onTap: widget.onFilter,
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 18,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+        ),
+        const SizedBox(width: 10),
+        GestureDetector(
+          onTap: onFilter,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 18,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: 14,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  width: 14,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: 10,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  width: 10,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -27,9 +27,21 @@ class UsersListScreen extends StatelessWidget {
                   onLogout: () => signOutWithAuth(context),
                   onFilter: () => showSortSheet(context, userCtrl),
                   searchController: userCtrl.searchController,
-                  onClearSearch: userCtrl.clearSearch,
                   onSearchChanged: userCtrl.search,
                 ),
+                if (!userCtrl.isLoading && userCtrl.filteredUsers.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      'User List',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
                 Expanded(
                   child: UsersListView(
                     onDeleteUser: (id, name) => deleteUser(context, id, name),
@@ -38,12 +50,14 @@ class UsersListScreen extends StatelessWidget {
               ],
             ),
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => showAddUserDialog(context),
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.white,
-            icon: const Icon(Icons.person_add),
-            label: const Text('Add User'),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 35,vertical: 35),
+            child: FloatingActionButton(
+              onPressed: () => showAddUserDialog(context),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              child: const Icon(Icons.add),
+            ),
           ),
         );
       },
@@ -54,11 +68,18 @@ class UsersListScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AddUserScreen(
-        onSave: () {
+        onSave: (name, phone, age, imagePath) {
+          if (name.isEmpty || phone.isEmpty || age <= 0) {
+            Helpers.showSnackBar(context, 'Please fill all fields correctly', isError: true);
+            return;
+          }
           Navigator.pop(ctx);
           final userCtrl = context.read<UserController>();
-          userCtrl.addUser(name: 'Sam Curren', phone: '+91 9876543210', age: 43, imagePath: null);
+          userCtrl.addUser(name: name, phone: phone, age: age, imagePath: imagePath);
           Helpers.showSnackBar(context, 'User added successfully');
+        },
+        onCancel: (name, phone, age, imagePath) {
+          Navigator.pop(ctx);
         },
       ),
     );

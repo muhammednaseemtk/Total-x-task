@@ -37,9 +37,16 @@ class Helpers {
   }
 
   static String formatPhone(String phone) {
-    if (phone.length == 10) {
-      return '+91 ${phone.substring(0, 5)} ${phone.substring(5)}';
+    final digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
+    
+    if (digitsOnly.length == 10) {
+      return '+91 ${digitsOnly.substring(0, 5)} ${digitsOnly.substring(5)}';
     }
+    
+    if (phone.startsWith('+91')) {
+      return phone;
+    }
+    
     return phone;
   }
 

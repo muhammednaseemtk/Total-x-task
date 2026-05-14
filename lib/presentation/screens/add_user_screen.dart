@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../controllers/image_controller.dart';
+import 'dart:io';
 
-class AddUserScreen extends StatelessWidget {
-  final VoidCallback? onCancel;
-  final VoidCallback? onSave;
+class AddUserScreen extends StatefulWidget {
+  final void Function(String name, String phone, int age, String? imagePath)? onCancel;
+  final void Function(String name, String phone, int age, String? imagePath)? onSave;
 
   const AddUserScreen({
     super.key,
@@ -11,55 +14,99 @@ class AddUserScreen extends StatelessWidget {
   });
 
   @override
+  State<AddUserScreen> createState() => _AddUserScreenState();
+}
+
+class _AddUserScreenState extends State<AddUserScreen> {
+  final _nameController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ageController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: const Color(0xFFF5F5F5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(
-                child: AddUserTitleWidget(),
+    return Consumer<ImageController>(
+      builder: (context, imageController, child) {
+        return Dialog(
+          backgroundColor: const Color(0xFFF5F5F5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: AddUserTitleWidget(),
+                      ),
+                      const SizedBox(height: 20),
+                      const Center(
+                        child: ProfileImageWidget(),
+                      ),
+                      const SizedBox(height: 20),
+                      const LabelTextWidget(title: 'Name'),
+                      const SizedBox(height: 8),
+                      CustomTextFieldWidget(
+                        hintText: 'Sam Curren',
+                        keyboardType: TextInputType.name,
+                        controller: _nameController,
+                      ),
+                      const SizedBox(height: 14),
+                      const LabelTextWidget(title: 'Age'),
+                      const SizedBox(height: 8),
+                      CustomTextFieldWidget(
+                        hintText: '43',
+                        keyboardType: TextInputType.number,
+                        controller: _ageController,
+                      ),
+                      const SizedBox(height: 14),
+                      const LabelTextWidget(title: 'Phone Number'),
+                      const SizedBox(height: 8),
+                      CustomTextFieldWidget(
+                        hintText: '+91 9876543210',
+                        keyboardType: TextInputType.phone,
+                        controller: _phoneController,
+                      ),
+                      const SizedBox(height: 14),
+                      BottomButtonWidget(
+                        onCancel: () {
+                          imageController.clearImage();
+                          _nameController.clear();
+                          _ageController.clear();
+                          _phoneController.clear();
+                          widget.onCancel?.call('', '', 0, null);
+                        },
+                        onSave: () {
+                          final name = _nameController.text.trim();
+                          final phone = _phoneController.text.trim();
+                          final ageText = _ageController.text.trim();
+                          final age = int.tryParse(ageText) ?? 0;
+                          final imagePath = imageController.imagePath;
+                          
+                          widget.onSave?.call(name, phone, age, imagePath);
+                          imageController.clearImage();
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 28),
-              const Center(
-                child: ProfileImageWidget(),
-              ),
-              const SizedBox(height: 34),
-              const LabelTextWidget(title: 'Name'),
-              const SizedBox(height: 12),
-              const CustomTextFieldWidget(
-                hintText: 'Sam Curren',
-                keyboardType: TextInputType.name,
-              ),
-              const SizedBox(height: 26),
-              const LabelTextWidget(title: 'Age'),
-              const SizedBox(height: 12),
-              const CustomTextFieldWidget(
-                hintText: '43',
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 26),
-              const LabelTextWidget(title: 'Phone Number'),
-              const SizedBox(height: 12),
-              const CustomTextFieldWidget(
-                hintText: '+91 9876543210',
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 26),
-              BottomButtonWidget(
-                onCancel: onCancel ?? () => Navigator.pop(context),
-                onSave: onSave ?? () => Navigator.pop(context),
-              ),
-              const SizedBox(height: 10),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -85,79 +132,90 @@ class ProfileImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 170,
-      height: 170,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 160,
-            height: 160,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF0BB2F5),
-                  Color(0xFF365AE8),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 30,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9E1EA),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 76,
-            child: Container(
-              width: 84,
-              height: 58,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9E1EA),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(45),
-                  topRight: Radius.circular(45),
+    return Consumer<ImageController>(
+      builder: (context, imageController, child) {
+        return GestureDetector(
+          onTap: () => _showImagePickerSheet(context, imageController),
+          child: SizedBox(
+            width: 140,
+            height: 140,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (imageController.imagePath != null)
+                  ClipOval(
+                    child: Image.file(
+                      File(imageController.imagePath!),
+                      width: 130,
+                      height: 130,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                else
+                  Container(
+                    width: 130,
+                    height: 130,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF0BB2F5), Color(0xFF365AE8)],
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  bottom: 26,
+                  child: Container(
+                    width: 32,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 16),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-          Positioned(
-            bottom: 26,
-            child: Container(
-              width: 165,
-              height: 46,
-              decoration: const BoxDecoration(
-                color: Color(0xFF1D4A8F),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(90),
-                  bottomRight: Radius.circular(90),
-                ),
-              ),
+        );
+      },
+    );
+  }
+
+  void _showImagePickerSheet(BuildContext context, ImageController imageController) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                imageController.pickImageFromGallery();
+              },
             ),
-          ),
-          Positioned(
-            bottom: 34,
-            child: Container(
-              width: 38,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(ctx);
+                imageController.pickImageFromCamera();
+              },
             ),
-          ),
-        ],
+            if (imageController.imagePath != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Remove', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  imageController.clearImage();
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -179,32 +237,35 @@ class LabelTextWidget extends StatelessWidget {
 class CustomTextFieldWidget extends StatelessWidget {
   final String hintText;
   final TextInputType keyboardType;
+  final TextEditingController? controller;
 
   const CustomTextFieldWidget({
     super.key,
     required this.hintText,
     required this.keyboardType,
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 60,
+      height: 44,
       child: TextFormField(
+        controller: controller,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 18, color: Color(0xFF3B3B3B), fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 16, color: Color(0xFF3B3B3B), fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(fontSize: 18, color: Color(0xFF3B3B3B), fontWeight: FontWeight.w500),
+          hintStyle: const TextStyle(fontSize: 16, color: Color(0xFF3B3B3B), fontWeight: FontWeight.w500),
           filled: true,
           fillColor: const Color(0xFFF5F5F5),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Color(0xFFD1D1D1), width: 2),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Color(0xFF2B7DE9), width: 2),
           ),
         ),
@@ -227,8 +288,8 @@ class BottomButtonWidget extends StatelessWidget {
         GestureDetector(
           onTap: onCancel,
           child: Container(
-            width: 102,
-            height: 52,
+            width: 95,
+            height: 48,
             decoration: BoxDecoration(color: const Color(0xFFE0E0E0), borderRadius: BorderRadius.circular(16)),
             child: const Center(
               child: Text('Cancel', style: TextStyle(fontSize: 18, color: Color(0xFF7D7D7D), fontWeight: FontWeight.w500)),
@@ -239,8 +300,8 @@ class BottomButtonWidget extends StatelessWidget {
         GestureDetector(
           onTap: onSave,
           child: Container(
-            width: 102,
-            height: 52,
+            width: 95,
+            height: 48,
             decoration: BoxDecoration(color: const Color(0xFF257CEB), borderRadius: BorderRadius.circular(16)),
             child: const Center(
               child: Text('Save', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w500)),

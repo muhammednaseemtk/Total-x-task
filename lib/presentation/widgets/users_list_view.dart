@@ -4,7 +4,7 @@ import '../../core/constants/color_constants.dart';
 import '../../core/utils/helpers.dart';
 import '../../domain/entities/user.dart';
 import '../controllers/user_controller.dart';
-import 'users_delete_dialog.dart';
+import 'user_list_card.dart';
 
 class UsersListView extends StatefulWidget {
   final Function(String, String) onDeleteUser;
@@ -21,12 +21,15 @@ class _UsersListViewState extends State<UsersListView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<UserController>().loadUsers());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<UserController>().loadUsers(),
+    );
     _scrollCtrl.addListener(_onScroll);
   }
 
   void _onScroll() {
-    if (_scrollCtrl.position.pixels >= _scrollCtrl.position.maxScrollExtent - 200) {
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 200) {
       context.read<UserController>().loadMoreUsers();
     }
   }
@@ -42,10 +45,16 @@ class _UsersListViewState extends State<UsersListView> {
   Widget build(BuildContext context) {
     return Consumer<UserController>(
       builder: (context, userCtrl, child) {
-        if (userCtrl.isLoading && userCtrl.users.isEmpty) return const Center(child: CircularProgressIndicator());
+        if (userCtrl.isLoading && userCtrl.users.isEmpty)
+          return const Center(child: CircularProgressIndicator());
         final displayUsers = userCtrl.filteredUsers;
-        if (userCtrl.errorMessage != null && displayUsers.isEmpty) return _ErrorState(message: userCtrl.errorMessage!, onRetry: () => userCtrl.loadUsers(refresh: true));
-        if (displayUsers.isEmpty && userCtrl.searchQuery.isNotEmpty) return const _NoSearchResultsState();
+        if (userCtrl.errorMessage != null && displayUsers.isEmpty)
+          return _ErrorState(
+            message: userCtrl.errorMessage!,
+            onRetry: () => userCtrl.loadUsers(refresh: true),
+          );
+        if (displayUsers.isEmpty && userCtrl.searchQuery.isNotEmpty)
+          return const _NoSearchResultsState();
         if (displayUsers.isEmpty) return const _EmptyState();
 
         return RefreshIndicator(
@@ -55,24 +64,31 @@ class _UsersListViewState extends State<UsersListView> {
             padding: const EdgeInsets.all(16),
             itemCount: displayUsers.length + (userCtrl.hasMoreData ? 1 : 0),
             itemBuilder: (context, index) {
-              if (index == displayUsers.length) return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+              if (index == displayUsers.length)
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               final user = displayUsers[index];
-              return UserListItem(
-                key: ValueKey(user.id),
-                user: user,
-                onDelete: () => _confirmDelete(context, user.id, user.name),
-              );
+              if (user.imageUrl != null && user.imageUrl!.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: UserListCard(
+                    key: ValueKey(user.id),
+                    name: user.name,
+                    age: user.age,
+                    imagePath: user.imageUrl!,
+                    phone: user.phone,
+                  ),
+                );
+              }
+              return UserListItem(key: ValueKey(user.id), user: user);
             },
           ),
         );
       },
-    );
-  }
-
-  void _confirmDelete(BuildContext context, String id, String name) {
-    showDialog(
-      context: context,
-      builder: (ctx) => UsersDeleteDialog(name: name, onConfirm: () => widget.onDeleteUser(id, name)),
     );
   }
 }
@@ -88,9 +104,15 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.people_outline, size: 64, color: AppColors.grey),
           SizedBox(height: 16),
-          Text('No users found', style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+          Text(
+            'No users found',
+            style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
+          ),
           SizedBox(height: 8),
-          Text('Add your first user by tapping the button below', style: TextStyle(color: AppColors.grey)),
+          Text(
+            'Add your first user by tapping the button below',
+            style: TextStyle(color: AppColors.grey),
+          ),
         ],
       ),
     );
@@ -108,9 +130,15 @@ class _NoSearchResultsState extends StatelessWidget {
         children: [
           Icon(Icons.search_off, size: 64, color: AppColors.grey),
           SizedBox(height: 16),
-          Text('No results found', style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+          Text(
+            'No results found',
+            style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
+          ),
           SizedBox(height: 8),
-          Text('Try a different search term', style: TextStyle(color: AppColors.grey)),
+          Text(
+            'Try a different search term',
+            style: TextStyle(color: AppColors.grey),
+          ),
         ],
       ),
     );
@@ -142,9 +170,8 @@ class _ErrorState extends StatelessWidget {
 
 class UserListItem extends StatelessWidget {
   final User user;
-  final VoidCallback? onDelete;
 
-  const UserListItem({super.key, required this.user, this.onDelete});
+  const UserListItem({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +180,13 @@ class UserListItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 10, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(13),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -169,15 +202,27 @@ class UserListItem extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(user.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text(Helpers.formatPhone(user.phone), style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                      Text(
+                        Helpers.formatPhone(user.phone),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       _AgeTag(age: user.age),
                     ],
                   ),
                 ),
-                if (onDelete != null) IconButton(icon: const Icon(Icons.delete_outline, color: AppColors.error), onPressed: onDelete),
               ],
             ),
           ),
@@ -200,7 +245,14 @@ class _UserAvatar extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       child: Center(
-        child: Text(Helpers.getInitials(name), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.white)),
+        child: Text(
+          Helpers.getInitials(name),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.white,
+          ),
+        ),
       ),
     );
   }
@@ -215,8 +267,20 @@ class _AgeTag extends StatelessWidget {
     final isOlder = age > 60;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: isOlder ? Colors.orange.withAlpha(26) : Colors.green.withAlpha(26), borderRadius: BorderRadius.circular(4)),
-      child: Text('Age: $age', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isOlder ? Colors.orange[700] : Colors.green[700])),
+      decoration: BoxDecoration(
+        color: isOlder
+            ? Colors.orange.withAlpha(26)
+            : Colors.green.withAlpha(26),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        'Age: $age',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: isOlder ? Colors.orange[700] : Colors.green[700],
+        ),
+      ),
     );
   }
 }
