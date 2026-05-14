@@ -12,7 +12,7 @@ class AuthController extends ChangeNotifier {
   List<GoogleSignInAccount> availableAccounts = [];
 
   AuthController({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository() {
+    : _authRepository = authRepository ?? AuthRepository() {
     initAuthState();
   }
 
