@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/color_constants.dart';
+import '../constants/app_colors.dart';
 
 class Helpers {
   Helpers._();

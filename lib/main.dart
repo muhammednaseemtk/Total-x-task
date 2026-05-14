@@ -3,49 +3,43 @@ import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_theme.dart';
-import 'data/models/user_hive_model.dart';
-import 'data/repositories/user_repository_impl.dart';
-import 'data/services/user_service.dart';
-import 'data/services/user_hive_service.dart';
-import 'data/services/local_image_service.dart';
-import 'data/services/firebase_auth_service.dart';
-import 'presentation/controllers/user_controller.dart';
-import 'presentation/controllers/auth_controller.dart';
-import 'presentation/controllers/image_controller.dart';
-import 'presentation/screens/login_screen.dart';
+import 'views/home/models/user_hive_model.dart';
+import 'core/services/hive_service.dart';
+import 'core/services/image_service.dart';
+import 'repositories/auth_repository.dart';
+import 'repositories/user_repository.dart';
+import 'views/auth/controllers/auth_controller.dart';
+import 'views/home/controllers/user_controller.dart';
+import 'views/home/controllers/image_controller.dart';
+import 'core/routes/app_routes.dart';
+import 'core/routes/route_names.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase for user data (Firestore)
   await Firebase.initializeApp();
   
-  // Initialize Hive for image paths
   await Hive.initFlutter();
   Hive.registerAdapter(UserHiveModelAdapter());
   
-  // Initialize services
-  final userService = UserService();
-  final userHiveService = UserHiveService();
-  await userHiveService.init();
-  final localImageService = LocalImageService();
-  final firebaseAuthService = FirebaseAuthService();
+  final hiveService = HiveService();
+  await hiveService.init();
   
-  // Create repository
-  final userRepository = UserRepositoryImpl(
-    userService: userService,
-    userHiveService: userHiveService,
-    localImageService: localImageService,
+  final imageService = ImageService();
+  final authRepository = AuthRepository();
+  final userRepository = UserRepository(
+    hiveService: hiveService,
+    imageService: imageService,
   );
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => UserController(repository: userRepository),
+          create: (_) => AuthController(authRepository: authRepository),
         ),
         ChangeNotifierProvider(
-          create: (_) => AuthController(authService: firebaseAuthService),
+          create: (_) => UserController(repository: userRepository),
         ),
         ChangeNotifierProvider(
           create: (_) => ImageController(),
@@ -65,7 +59,8 @@ class TotalXApp extends StatelessWidget {
       title: 'TOTAL-X',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const LoginScreen(),
+      initialRoute: RouteNames.login,
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
