@@ -54,7 +54,7 @@ class UserController extends ChangeNotifier {
         pageSize: AppSizes.pageSize.toInt(),
       );
 
-      if (refresh) {
+      if (refresh || currentPage == 0) {
         users = newUsers;
       } else {
         users.addAll(newUsers);
@@ -204,12 +204,20 @@ class UserController extends ChangeNotifier {
   void reset() {
     users = [];
     filteredUsers = [];
+    isLoading = false;
+    isLoadingMore = false;
+    errorMessage = null;
     searchQuery = '';
     sortType = SortType.all;
     currentPage = 0;
     hasMoreData = true;
     searchController.clear();
     notifyListeners();
+  }
+
+  Future<void> clearLocalSession() async {
+    reset();
+    await repository.clearLocalSession();
   }
 
   @override

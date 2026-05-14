@@ -1,286 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/utils/helpers.dart';
-import '../models/user_model.dart';
 import '../controllers/user_controller.dart';
+import 'user_empty_state.dart';
+import 'user_error_state.dart';
+import 'user_list_item.dart';
+import 'user_loading_more_indicator.dart';
+import 'user_no_search_results_state.dart';
 import 'user_tile.dart';
 
-class UsersListView extends StatefulWidget {
+class UsersListView extends StatelessWidget {
   final Function(String, String) onDeleteUser;
 
   const UsersListView({super.key, required this.onDeleteUser});
 
   @override
-  State<UsersListView> createState() => _UsersListViewState();
-}
-
-class _UsersListViewState extends State<UsersListView> {
-  final _scrollCtrl = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<UserController>().loadUsers(),
-    );
-    _scrollCtrl.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollCtrl.position.pixels >=
-        _scrollCtrl.position.maxScrollExtent - 200) {
-      context.read<UserController>().loadMoreUsers();
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollCtrl.removeListener(_onScroll);
-    _scrollCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Consumer<UserController>(
       builder: (context, userCtrl, child) {
-        if (userCtrl.isLoading && userCtrl.users.isEmpty)
+        _loadInitialUsers(context, userCtrl);
+
+        if (userCtrl.isLoading && userCtrl.users.isEmpty) {
           return const Center(child: CircularProgressIndicator());
+        }
+
         final displayUsers = userCtrl.filteredUsers;
-        if (userCtrl.errorMessage != null && displayUsers.isEmpty)
-          return _ErrorState(
+
+        if (userCtrl.errorMessage != null && displayUsers.isEmpty) {
+          return UserErrorState(
             message: userCtrl.errorMessage!,
-            onRetry: () => userCtrl.loadUsers(refresh: true),
+            onRetry: () {
+              userCtrl.loadUsers(refresh: true);
+            },
           );
-        if (displayUsers.isEmpty && userCtrl.searchQuery.isNotEmpty)
-          return const _NoSearchResultsState();
-        if (displayUsers.isEmpty) return const _EmptyState();
+        }
+
+        if (displayUsers.isEmpty && userCtrl.searchQuery.trim().isNotEmpty) {
+          return const UserNoSearchResultsState();
+        }
+
+        if (displayUsers.isEmpty) {
+          return const UserEmptyState();
+        }
 
         return RefreshIndicator(
-          onRefresh: () => userCtrl.loadUsers(refresh: true),
-          child: ListView.builder(
-            controller: _scrollCtrl,
-            padding: const EdgeInsets.all(16),
-            itemCount: displayUsers.length + (userCtrl.hasMoreData ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == displayUsers.length)
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              final user = displayUsers[index];
-              if (user.imageUrl != null && user.imageUrl!.isNotEmpty) {
+          onRefresh: () async {
+            await userCtrl.loadUsers(refresh: true);
+          },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              _loadMoreUsers(notification, userCtrl);
+              return false;
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: displayUsers.length + (userCtrl.hasMoreData ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= displayUsers.length) {
+                  return const UserLoadingMoreIndicator();
+                }
+
+                final user = displayUsers[index];
+
+                final hasImage =
+                    user.imageUrl != null && user.imageUrl!.trim().isNotEmpty;
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: UserTile(
-                    key: ValueKey(user.id),
-                    name: user.name,
-                    age: user.age,
-                    imagePath: user.imageUrl!,
-                    phone: user.phone,
-                  ),
+                  child: hasImage
+                      ? UserTile(
+                          key: ValueKey(user.id),
+                          name: user.name,
+                          age: user.age,
+                          imagePath: user.imageUrl!,
+                          phone: user.phone,
+                        )
+                      : UserListItem(key: ValueKey(user.id), user: user),
                 );
-              }
-              return UserListItem(key: ValueKey(user.id), user: user);
-            },
+              },
+            ),
           ),
         );
       },
     );
   }
-}
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_outline, size: 64, color: AppColors.grey),
-          SizedBox(height: 16),
-          Text(
-            'No users found',
-            style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Add your first user by tapping the button below',
-            style: TextStyle(color: AppColors.grey),
-          ),
-        ],
-      ),
-    );
+  void _loadInitialUsers(BuildContext context, UserController userCtrl) {
+    if (userCtrl.users.isEmpty &&
+        !userCtrl.isLoading &&
+        userCtrl.errorMessage == null &&
+        userCtrl.currentPage == 0 &&
+        userCtrl.hasMoreData) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.read<UserController>().loadUsers(refresh: true);
+        }
+      });
+    }
   }
-}
 
-class _NoSearchResultsState extends StatelessWidget {
-  const _NoSearchResultsState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off, size: 64, color: AppColors.grey),
-          SizedBox(height: 16),
-          Text(
-            'No results found',
-            style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Try a different search term',
-            style: TextStyle(color: AppColors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorState({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.grey),
-          const SizedBox(height: 16),
-          Text(message, style: const TextStyle(color: AppColors.textSecondary)),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-}
-
-class UserListItem extends StatelessWidget {
-  final UserModel user;
-
-  const UserListItem({super.key, required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _UserAvatar(name: user.name),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        Helpers.formatPhone(user.phone),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      _AgeTag(age: user.age),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _UserAvatar extends StatelessWidget {
-  final String name;
-
-  const _UserAvatar({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Helpers.getAvatarColor(name.isNotEmpty ? name : 'User');
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-      child: Center(
-        child: Text(
-          Helpers.getInitials(name),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.white,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AgeTag extends StatelessWidget {
-  final int age;
-  const _AgeTag({required this.age});
-
-  @override
-  Widget build(BuildContext context) {
-    final isOlder = age > 60;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: isOlder
-            ? Colors.orange.withAlpha(26)
-            : Colors.green.withAlpha(26),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        'Age: $age',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: isOlder ? Colors.orange[700] : Colors.green[700],
-        ),
-      ),
-    );
+  void _loadMoreUsers(
+    ScrollNotification notification,
+    UserController userCtrl,
+  ) {
+    if (notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 200 &&
+        !userCtrl.isLoading &&
+        userCtrl.hasMoreData) {
+      userCtrl.loadMoreUsers();
+    }
   }
 }

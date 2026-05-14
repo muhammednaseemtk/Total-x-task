@@ -1,20 +1,27 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageService {
   final ImagePicker _picker = ImagePicker();
-  
-  Future<String> get _imagesDirectory async {
+
+  String _directoryNameFor(String ownerId) {
+    return base64Url.encode(utf8.encode(ownerId)).replaceAll('=', '');
+  }
+
+  Future<String> _imagesDirectory({required String ownerId}) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final imagesDir = Directory('${appDir.path}/user_images');
+    final imagesDir = Directory(
+      '${appDir.path}/user_images/${_directoryNameFor(ownerId)}',
+    );
     if (!await imagesDir.exists()) {
       await imagesDir.create(recursive: true);
     }
     return imagesDir.path;
   }
 
-  Future<String?> pickImageFromGallery() async {
+  Future<String?> pickImageFromGallery({required String ownerId}) async {
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -23,7 +30,7 @@ class ImageService {
         imageQuality: 80,
       );
       if (image != null) {
-        return await saveImage(image.path);
+        return await saveImage(image.path, ownerId: ownerId);
       }
       return null;
     } catch (e) {
@@ -31,7 +38,7 @@ class ImageService {
     }
   }
 
-  Future<String?> pickImageFromCamera() async {
+  Future<String?> pickImageFromCamera({required String ownerId}) async {
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
@@ -40,7 +47,7 @@ class ImageService {
         imageQuality: 80,
       );
       if (image != null) {
-        return await saveImage(image.path);
+        return await saveImage(image.path, ownerId: ownerId);
       }
       return null;
     } catch (e) {
@@ -48,7 +55,7 @@ class ImageService {
     }
   }
 
-  Future<String> saveImage(String sourcePath) async {
+  Future<String> saveImage(String sourcePath, {required String ownerId}) async {
     final file = File(sourcePath);
     if (!await file.exists()) {
       throw Exception('Source image file not found');
@@ -56,7 +63,7 @@ class ImageService {
 
     final extension = sourcePath.split('.').last;
     final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
-    final imagesDir = await _imagesDirectory;
+    final imagesDir = await _imagesDirectory(ownerId: ownerId);
     final destinationPath = '$imagesDir/$fileName';
 
     await file.copy(destinationPath);

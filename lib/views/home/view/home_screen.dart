@@ -127,6 +127,8 @@ class HomeScreen extends StatelessWidget {
     );
     if (confirmed == true && context.mounted) {
       final authCtrl = context.read<AuthController>();
+      final userCtrl = context.read<UserController>();
+      await userCtrl.clearLocalSession();
       await authCtrl.signOut();
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(

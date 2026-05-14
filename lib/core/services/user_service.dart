@@ -19,27 +19,42 @@ class UserService {
   CollectionReference get usersCollection =>
       firestore.collection('users').doc(currentUserId).collection('people');
 
+  DocumentSnapshot? _lastDocument;
+  String? _paginationUserId;
+
+  void resetPagination() {
+    _lastDocument = null;
+    _paginationUserId = null;
+  }
+
   Future<List<UserModel>> getUsers({int page = 0, int pageSize = 20}) async {
-    final QuerySnapshot querySnapshot = await usersCollection
+    final userId = currentUserId;
+    if (page == 0 || _paginationUserId != userId) {
+      resetPagination();
+      _paginationUserId = userId;
+    }
+
+    Query query = usersCollection
         .orderBy('createdAt', descending: true)
-        .limit(pageSize)
-        .get();
+        .limit(pageSize);
 
-    final List<QueryDocumentSnapshot> docs = querySnapshot.docs;
+    if (page > 0) {
+      if (_lastDocument == null) {
+        return [];
+      }
+      query = query.startAfterDocument(_lastDocument!);
+    }
 
-    final startIndex = page * pageSize;
+    final QuerySnapshot querySnapshot = await query.get();
+    final docs = querySnapshot.docs;
 
-    if (startIndex >= docs.length) {
+    if (docs.isEmpty) {
       return [];
     }
 
-    final endIndex = (startIndex + pageSize > docs.length)
-        ? docs.length
-        : startIndex + pageSize;
+    _lastDocument = docs.last;
 
-    final pageDocs = docs.sublist(startIndex, endIndex);
-
-    return pageDocs.map((doc) {
+    return docs.map((doc) {
       return UserModel.fromJson({
         ...doc.data() as Map<String, dynamic>,
         'id': doc.id,
@@ -61,7 +76,8 @@ class UserService {
   }
 
   Future<UserModel> addUser(UserModel user) async {
-    final DocumentReference docRef = await usersCollection.add(user.toJson());
+    final data = user.toJson()..remove('imageUrl');
+    final DocumentReference docRef = await usersCollection.add(data);
 
     return UserModel(
       id: docRef.id,
@@ -74,7 +90,8 @@ class UserService {
   }
 
   Future<UserModel> updateUser(UserModel user) async {
-    await usersCollection.doc(user.id).update(user.toJson());
+    final data = user.toJson()..remove('imageUrl');
+    await usersCollection.doc(user.id).update(data);
 
     return user;
   }

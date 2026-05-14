@@ -28,7 +28,8 @@ class AppStrings {
   static const String below25 = 'Below 25';
 
   static const String signInWithGoogle = 'Sign in with Google';
-  static const String termsText = 'By continuing, you agree to our Terms of Service and Privacy Policy';
+  static const String termsText =
+      'By continuing, you agree to our Terms of Service and Privacy Policy';
 
   static const String errorGeneric = 'Something went wrong. Please try again.';
   static const String errorNetwork = 'Please check your internet connection.';
@@ -41,9 +42,11 @@ class AppStrings {
   static const String successSignOut = 'Signed out successfully';
 
   static const String confirmDeleteTitle = 'Delete User';
-  static const String confirmDeleteMessage = 'Are you sure you want to delete this user?';
+  static const String confirmDeleteMessage =
+      'Are you sure you want to delete this user?';
   static const String confirmSignOutTitle = 'Sign Out';
-  static const String confirmSignOutMessage = 'Are you sure you want to sign out?';
+  static const String confirmSignOutMessage =
+      'Are you sure you want to sign out?';
 
   static const String gallery = 'Gallery';
   static const String camera = 'Camera';

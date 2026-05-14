@@ -20,17 +20,11 @@ class UserTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 110,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFD4D4D4),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFD4D4D4), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import '../controllers/auth_controller.dart';
+import '../../home/controllers/user_controller.dart';
 import '../../../core/routes/route_names.dart';
 
 class LoginGoogleButton extends StatelessWidget {
@@ -32,6 +33,7 @@ class LoginGoogleButton extends StatelessWidget {
               final success = await auth.signInWithGoogle();
 
               if (success && context.mounted) {
+                context.read<UserController>().reset();
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   RouteNames.home,

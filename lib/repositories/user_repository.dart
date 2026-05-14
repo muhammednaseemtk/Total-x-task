@@ -17,28 +17,29 @@ class UserRepository {
         _hiveService = hiveService ?? HiveService(),
         _imageService = imageService ?? ImageService();
 
+  Future<String> _ensureUserStore() async {
+    final userId = _userService.currentUserId;
+    await _hiveService.switchUser(userId);
+    return userId;
+  }
+
   Future<List<UserModel>> getUsers({int page = 0, int pageSize = 20}) async {
-    final firestoreUsers = await _userService.getUsers(page: page, pageSize: pageSize);
-    
+    await _ensureUserStore();
+    final firestoreUsers = await _userService.getUsers(
+      page: page,
+      pageSize: pageSize,
+    );
+
     final imagePaths = await _getAllImagePaths();
-    
-    return firestoreUsers.map((user) {
-      final imagePath = imagePaths[user.id];
-      return UserModel(
-        id: user.id,
-        name: user.name,
-        phone: user.phone,
-        age: user.age,
-        imageUrl: imagePath,
-        createdAt: user.createdAt,
-      );
-    }).toList();
+
+    return _withLocalImagePaths(firestoreUsers, imagePaths);
   }
 
   Future<UserModel?> getUserById(String id) async {
+    await _ensureUserStore();
     final user = await _userService.getUserById(id);
     if (user == null) return null;
-    
+
     final imagePath = await _hiveService.getImagePath(id);
     return UserModel(
       id: user.id,
@@ -51,8 +52,9 @@ class UserRepository {
   }
 
   Future<UserModel> addUser(UserModel user) async {
+    await _ensureUserStore();
     final addedUser = await _userService.addUser(user);
-    
+
     if (user.imageUrl != null && user.imageUrl!.isNotEmpty) {
       final hiveUser = UserHiveModel(
         id: addedUser.id,
@@ -60,11 +62,11 @@ class UserRepository {
         phone: '',
         age: 0,
         imagePath: user.imageUrl,
-        createdAt: DateTime.now(),
+        createdAt: addedUser.createdAt,
       );
       await _hiveService.addUser(hiveUser);
     }
-    
+
     return UserModel(
       id: addedUser.id,
       name: addedUser.name,
@@ -76,8 +78,9 @@ class UserRepository {
   }
 
   Future<UserModel> updateUser(UserModel user) async {
+    await _ensureUserStore();
     final updatedUser = await _userService.updateUser(user);
-    
+
     if (user.imageUrl != null && user.imageUrl!.isNotEmpty) {
       final existingHiveUser = await _hiveService.getUserById(user.id);
       if (existingHiveUser != null) {
@@ -90,7 +93,7 @@ class UserRepository {
           phone: '',
           age: 0,
           imagePath: user.imageUrl,
-          createdAt: DateTime.now(),
+          createdAt: updatedUser.createdAt,
         );
         await _hiveService.addUser(hiveUser);
       }
@@ -107,22 +110,33 @@ class UserRepository {
   }
 
   Future<void> deleteUser(String id) async {
-    final user = await _userService.getUserById(id);
-    
+    await _ensureUserStore();
+    final imagePath = await _hiveService.getImagePath(id);
+
     await _userService.deleteUser(id);
     await _hiveService.deleteUser(id);
-    
-    if (user?.imageUrl != null && user!.imageUrl!.isNotEmpty) {
-      await _imageService.deleteImage(user.imageUrl!);
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      await _imageService.deleteImage(imagePath);
     }
   }
 
   Future<String> uploadImage(String localPath) async {
-    return await _imageService.saveImage(localPath);
+    final userId = await _ensureUserStore();
+    return await _imageService.saveImage(localPath, ownerId: userId);
   }
 
   Stream<List<UserModel>> watchUsers() {
-    return _userService.watchUsers();
+    return _userService.watchUsers().asyncMap((firestoreUsers) async {
+      await _ensureUserStore();
+      final imagePaths = await _getAllImagePaths();
+      return _withLocalImagePaths(firestoreUsers, imagePaths);
+    });
+  }
+
+  Future<void> clearLocalSession() async {
+    _userService.resetPagination();
+    await _hiveService.closeCurrentUser();
   }
 
   Future<Map<String, String>> _getAllImagePaths() async {
@@ -134,5 +148,22 @@ class UserRepository {
       }
     }
     return paths;
+  }
+
+  List<UserModel> _withLocalImagePaths(
+    List<UserModel> firestoreUsers,
+    Map<String, String> imagePaths,
+  ) {
+    return firestoreUsers.map((user) {
+      final imagePath = imagePaths[user.id];
+      return UserModel(
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        age: user.age,
+        imageUrl: imagePath,
+        createdAt: user.createdAt,
+      );
+    }).toList();
   }
 }

@@ -38,15 +38,15 @@ class Helpers {
 
   static String formatPhone(String phone) {
     final digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (digitsOnly.length == 10) {
       return '+91 ${digitsOnly.substring(0, 5)} ${digitsOnly.substring(5)}';
     }
-    
+
     if (phone.startsWith('+91')) {
       return phone;
     }
-    
+
     return phone;
   }
 
@@ -59,7 +59,11 @@ class Helpers {
     return age != null && age > 0 && age <= 120;
   }
 
-  static void showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  static void showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
